@@ -30,7 +30,15 @@ public class ObjectPooler : MonoBehaviour
             return;
         }
 
-        InitializePools();
+        // IMPORTANT CHANGE: Do NOT call InitializePools() directly in Awake().
+        // Instead, provide a public method for explicit initialization.
+        // For runtime, you might call SetupPooler() from another script's Start()
+        // or a game manager, or if poolConfigurations are already set in Inspector,
+        // we can call it here for convenience in a live game.
+        if (poolConfigurations != null && poolConfigurations.Count > 0)
+        {
+            SetupPooler();
+        }
     }
 
     #endregion
@@ -55,13 +63,38 @@ public class ObjectPooler : MonoBehaviour
 
     /// <summary>
     /// Initializes all pools based on the configurations set in the Inspector.
+    /// This method is now public and can be called explicitly.
     /// </summary>
-    private void InitializePools()
+    public void SetupPooler()
     {
+        if (_pools != null)
+        {
+            Debug.LogWarning("ObjectPooler: Pools already initialized. Re-initializing.");
+            // Clear existing pools if re-initializing
+            foreach (var pool in _pools.Values)
+            {
+                while (pool.objectQueue.Count > 0)
+                {
+                    Object.Destroy(pool.objectQueue.Dequeue());
+                }
+            }
+        }
         _pools = new Dictionary<string, Pool>();
+
+        if (poolConfigurations == null)
+        {
+            Debug.LogError("ObjectPooler: poolConfigurations list is null. Cannot initialize pools.");
+            return;
+        }
 
         foreach (var config in poolConfigurations)
         {
+            if (config.prefab == null)
+            {
+                Debug.LogWarning($"ObjectPooler: Pool with tag '{config.tag}' has a null prefab. Skipping initialization for this pool.");
+                continue;
+            }
+
             config.objectQueue = new Queue<GameObject>();
 
             for (int i = 0; i < config.initialSize; i++)
@@ -85,9 +118,10 @@ public class ObjectPooler : MonoBehaviour
     /// <returns>The spawned GameObject, or null if the tag is not found.</returns>
     public GameObject GetFromPool(string tag, Vector3 position, Quaternion rotation)
     {
-        if (!_pools.TryGetValue(tag, out var pool))
+        // Ensure pools are initialized before attempting to get from them
+        if (_pools == null || !_pools.TryGetValue(tag, out var pool))
         {
-            Debug.LogWarning($"Pool with tag '{tag}' doesn't exist.");
+            Debug.LogWarning($"Pool with tag '{tag}' doesn't exist or pools are not initialized.");
             return null;
         }
 
@@ -129,9 +163,10 @@ public class ObjectPooler : MonoBehaviour
     /// <param name="objectToReturn">The GameObject to return.</param>
     public void ReturnToPool(string tag, GameObject objectToReturn)
     {
-        if (!_pools.ContainsKey(tag))
+        // Ensure pools are initialized before attempting to return to them
+        if (_pools == null || !_pools.ContainsKey(tag))
         {
-            Debug.LogWarning($"Pool with tag '{tag}' doesn't exist. Object will be destroyed.");
+            Debug.LogWarning($"Pool with tag '{tag}' doesn't exist or pools are not initialized. Object will be destroyed.");
             Destroy(objectToReturn);
             return;
         }
