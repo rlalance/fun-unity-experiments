@@ -21,9 +21,18 @@ public class Enemy : MonoBehaviour
     public float maxDirectionChangeTime = 10.0f;
 
     private Vector3 currentMoveDirection; // The current random direction this enemy is moving in
-    private float directionChangeTimer; // Timer to track when to change direction
+    private float directionChangeTimer;   // Timer to track when to change direction
 
     private LineRenderer lineRenderer;
+    
+    private void Awake()
+    {
+        // Initialize the LineRenderer component for visual debugging
+        lineRenderer = gameObject.GetComponent<LineRenderer>();
+        lineRenderer.widthMultiplier = 0.1f; // Set line width
+        lineRenderer.positionCount = 2; // We need 2 points for a line segment
+        lineRenderer.enabled = false; // Initially disable the line renderer
+    }
 
     /// <summary>
     /// Called when the enemy GameObject is enabled (e.g., from pool or initial spawn).
@@ -43,14 +52,6 @@ public class Enemy : MonoBehaviour
 
         // Initialize first random direction
         GenerateRandomDirection();
-
-        lineRenderer = gameObject.GetComponent<LineRenderer>();
-        if (lineRenderer)
-        {
-            lineRenderer.widthMultiplier = 0.1f; // Set line width
-            lineRenderer.positionCount = 2; // We need 2 points for a line segment
-            lineRenderer.enabled = false; // Initially disable the line renderer
-        }
     }
 
     /// <summary>
@@ -116,26 +117,20 @@ public class Enemy : MonoBehaviour
 
         // Debug.Log($"{name} picked new random direction. Next change in {directionChangeTimer:F1}s.", this);
     }
-
+    
     public void DrawLine(Vector3 transformPosition, Color detectionLineColor)
-    {
-        if (lineRenderer)
-        {
-            lineRenderer.enabled = true; // Ensure the line is visible
-            lineRenderer.positionCount = 2;
-            lineRenderer.SetPosition(0, transform.position);
-            lineRenderer.SetPosition(1, transformPosition);
-            lineRenderer.startColor = detectionLineColor;
-            lineRenderer.endColor = detectionLineColor;
-        }
+    {   
+        lineRenderer.enabled = true; // Ensure the line is visible
+        lineRenderer.positionCount = 2;
+        lineRenderer.SetPosition(0, transform.position);
+        lineRenderer.SetPosition(1, transformPosition);
+        lineRenderer.startColor = detectionLineColor;
+        lineRenderer.endColor = detectionLineColor;
     }
-
+    
     public void RemoveLine()
     {
-        if (lineRenderer)
-        {
-            lineRenderer.enabled = false; // Disable the line renderer to hide the line
-            lineRenderer.positionCount = 0; // Optionally reset the position count to 0
-        }
+        lineRenderer.enabled = false; // Disable the line renderer to hide the line
+        lineRenderer.positionCount = 0; // Optionally reset the position count to 0
     }
 }

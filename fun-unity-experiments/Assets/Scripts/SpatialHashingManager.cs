@@ -19,10 +19,6 @@ public class SpatialHashingManager : MonoBehaviour
     // A list of all registered enemies, useful for initial population or general overview.
     private List<Enemy> allEnemies = new List<Enemy>(); // Keep this for now for internal management
 
-    // NEW: Public read-only property to expose the spatialHashMap
-    // This allows reading the dictionary and its lists, but not adding/removing cells from the dictionary itself.
-    public IReadOnlyDictionary<Vector3Int, List<Enemy>> SpatialGrid => spatialHashMap;
-
     void Awake()
     {
         if (Instance == null)
