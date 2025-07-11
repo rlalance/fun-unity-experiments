@@ -1,4 +1,3 @@
-using System;
 using UnityEngine;
 
 public class Player : MonoBehaviour
@@ -24,9 +23,6 @@ public class Player : MonoBehaviour
     {
         cam = Camera.main;
         
-        // Capture the mouse cursor and lock it to the center of the screen.
-        Cursor.lockState = CursorLockMode.Locked;
-
         yaw = cam.transform.eulerAngles.y;
         pitch = cam.transform.eulerAngles.x;
     }
@@ -34,14 +30,17 @@ public class Player : MonoBehaviour
     void Update()
     {
         // Mouse look controls
-        float mouseX = Input.GetAxis("Mouse X") * mouseSensitivity;
-        float mouseY = Input.GetAxis("Mouse Y") * mouseSensitivity;
+        if (Cursor.lockState == CursorLockMode.Locked)
+        {
+            float mouseX = Input.GetAxis("Mouse X") * mouseSensitivity;
+            float mouseY = Input.GetAxis("Mouse Y") * mouseSensitivity;
 
-        yaw += mouseX;
-        pitch -= mouseY;
-        pitch = Mathf.Clamp(pitch, -89f, 89f); // Prevent flipping
+            yaw += mouseX;
+            pitch -= mouseY;
+            pitch = Mathf.Clamp(pitch, -89f, 89f); // Prevent flipping
 
-        cam.transform.rotation = Quaternion.Euler(pitch, yaw, 0f);
+            cam.transform.rotation = Quaternion.Euler(pitch, yaw, 0f);
+        }
 
         Vector3 move = Vector3.zero;
         if (Input.GetKey(KeyCode.W))
