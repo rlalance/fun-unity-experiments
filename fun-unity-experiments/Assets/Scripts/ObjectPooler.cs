@@ -14,8 +14,6 @@ public interface IPoolableObject
 
 public class ObjectPooler : MonoBehaviour
 {
-    #region Singleton
-
     public static ObjectPooler Instance;
 
     private void Awake()
@@ -24,24 +22,12 @@ public class ObjectPooler : MonoBehaviour
         {
             Instance = this;
         }
-        else
-        {
-            Destroy(gameObject);
-            return;
-        }
 
-        // IMPORTANT CHANGE: Do NOT call InitializePools() directly in Awake().
-        // Instead, provide a public method for explicit initialization.
-        // For runtime, you might call SetupPooler() from another script's Start()
-        // or a game manager, or if poolConfigurations are already set in Inspector,
-        // we can call it here for convenience in a live game.
         if (poolConfigurations != null && poolConfigurations.Count > 0)
         {
             SetupPooler();
         }
     }
-
-    #endregion
 
     // A class to define the properties of a pool in the Inspector.
     [System.Serializable]
@@ -79,6 +65,7 @@ public class ObjectPooler : MonoBehaviour
                 }
             }
         }
+        
         _pools = new Dictionary<string, Pool>();
 
         if (poolConfigurations == null)
@@ -148,10 +135,8 @@ public class ObjectPooler : MonoBehaviour
 
         // Call the OnObjectSpawn method if the object implements the interface.
         IPoolableObject poolable = objectToSpawn.GetComponent<IPoolableObject>();
-        if (poolable != null)
-        {
-            poolable.OnObjectSpawn();
-        }
+
+        poolable?.OnObjectSpawn();
 
         return objectToSpawn;
     }
@@ -175,10 +160,8 @@ public class ObjectPooler : MonoBehaviour
         
         // Call the OnObjectDespawn method if the object implements the interface.
         IPoolableObject poolable = objectToReturn.GetComponent<IPoolableObject>();
-        if (poolable != null)
-        {
-            poolable.OnObjectDespawn();
-        }
+
+        poolable?.OnObjectDespawn();
 
         _pools[tag].objectQueue.Enqueue(objectToReturn);
     }

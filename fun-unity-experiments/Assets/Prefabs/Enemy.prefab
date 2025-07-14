@@ -14,7 +14,7 @@ GameObject:
   - component: {fileID: 7558417510712983858}
   m_Layer: 0
   m_Name: Enemy
-  m_TagString: Untagged
+  m_TagString: Enemy
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -59,6 +59,7 @@ MonoBehaviour:
   moveSpeed: 3
   minDirectionChangeTime: 5
   maxDirectionChangeTime: 10
+  lineAliveTime: 0.1
 --- !u!120 &7558417510712983858
 LineRenderer:
   serializedVersion: 2

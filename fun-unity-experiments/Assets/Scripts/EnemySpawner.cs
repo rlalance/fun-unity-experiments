@@ -1,4 +1,5 @@
 using UnityEngine;
+using Random = UnityEngine.Random;
 
 /// <summary>
 /// Spawns enemies from a pool and manages their initial setup.
@@ -17,10 +18,6 @@ public class EnemySpawner : MonoBehaviour
         if (Instance == null)
         {
             Instance = this;
-        }
-        else if (Instance != this)
-        {
-            Destroy(gameObject);
         }
     }
 
@@ -67,14 +64,44 @@ public class EnemySpawner : MonoBehaviour
 
         if (enemyGO != null)
         {
-            enemyGO.SetActive(true); // Ensure it's active
-            // The Enemy.cs script on the prefab will handle registration with SpatialHashingManager
-            Debug.Log($"Enemy spawned at {position} via bullet collision.");
+            enemyGO.SetActive(true);
         }
         else
         {
             Debug.LogWarning($"Failed to retrieve enemy from pool with tag: {ENEMY_TAG}. Pool might be exhausted or not set up correctly.");
         }
         return enemyGO;
+    }
+
+    public void Update()
+    {
+        if (Input.GetKeyDown(KeyCode.E))
+        {
+            for (int i = 0; i < 50; i++)
+            {
+                Vector3 randomPos = new Vector3(
+                    Random.Range(-spawnRadius, spawnRadius),
+                    0f,
+                    Random.Range(-spawnRadius, spawnRadius)
+                );
+                SpawnEnemyAt(randomPos);
+            }
+            Debug.Log("Spawned 50 additional enemies at random positions.");
+        }
+        else if (Input.GetKeyDown(KeyCode.Q))
+        {      
+            // Find all active enemies and remove 50 of them
+            var enemies = GameObject.FindGameObjectsWithTag(ENEMY_TAG);
+            int removedCount = 0;
+
+            foreach (var enemyGO in enemies)
+            {
+                if (removedCount >= 50) break; // Stop after removing 50
+                ObjectPooler.Instance.ReturnToPool(ENEMY_TAG, enemyGO);
+                removedCount++;
+            }
+
+            Debug.Log($"Removed {removedCount} enemies from the scene.");
+        }
     }
 }

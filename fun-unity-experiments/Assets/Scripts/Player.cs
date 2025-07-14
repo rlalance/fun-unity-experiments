@@ -30,7 +30,7 @@ public class Player : MonoBehaviour
     void Update()
     {
         // Mouse look controls
-        if (Cursor.lockState == CursorLockMode.Locked)
+        if (Input.GetMouseButton(1)) // Right mouse button for looking around
         {
             float mouseX = Input.GetAxis("Mouse X") * mouseSensitivity;
             float mouseY = Input.GetAxis("Mouse Y") * mouseSensitivity;
