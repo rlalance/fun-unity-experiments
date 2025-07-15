@@ -1,5 +1,11 @@
 # Unity Spatial Hashing & Proximity Detection Demo
 
+# In editor Screenshot - Scene View - 1000 enemies
+<img width="2615" height="1237" alt="image" src="https://github.com/user-attachments/assets/47212f95-163e-4cbc-84db-ab03272bc719" />
+
+# In build Screenshot - 4000 enemies
+<img width="3840" height="2160" alt="image" src="https://github.com/user-attachments/assets/b4c83123-1eab-4886-863e-53a057dff9bf" />
+
 ## Project Overview
 
 This Unity project serves as a technical demonstration of optimized nearest neighbor detection for dynamic entities within a 3D environment. It showcases a robust Spatial Hashing system combined with distributed processing and real-time visual feedback, designed to maintain high performance even with a significant number of moving objects.
