@@ -29,10 +29,6 @@ public class SpatialHashingManager : MonoBehaviour
         {
             Instance = this;
         }
-        else if (Instance != this)
-        {
-            Destroy(gameObject);
-        }
     }
 
     /// <summary>
@@ -183,6 +179,13 @@ public class SpatialHashingManager : MonoBehaviour
     {
         return spatialHashMap.Count;
     }
+    
+    // Get a read only list of all enemies currently registered
+    public IReadOnlyList<Enemy> GetAllEnemies()
+    {
+        return allEnemies.AsReadOnly();
+    }
+    
 
     // Optional: For debugging, visualize cells in Editor (Gizmos)
     void OnDrawGizmos()

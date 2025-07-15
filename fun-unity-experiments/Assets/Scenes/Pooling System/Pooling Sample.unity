@@ -292,7 +292,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: -2.53346, y: -10.895984, z: 12.23647}
-  m_LocalScale: {x: 10, y: 1, z: 10}
+  m_LocalScale: {x: 25, y: 1, z: 25}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
@@ -1117,6 +1117,7 @@ MonoBehaviour:
   fireRate: 0.1
   bulletSpeed: 20
   playerMovementSpeed: 20
+  mouseSensitivity: 2
 --- !u!4 &2055930948
 Transform:
   m_ObjectHideFlags: 0

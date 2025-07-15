@@ -398,7 +398,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 31.558, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
-  m_AnchoredPosition: {x: 21.948261, y: 6.89}
+  m_AnchoredPosition: {x: 21.948261, y: 7.5}
   m_SizeDelta: {x: 1920, y: 1080}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &189593339
@@ -1174,7 +1174,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
-  m_AnchoredPosition: {x: -32.14, y: 11.61}
+  m_AnchoredPosition: {x: -32.14, y: 16.1}
   m_SizeDelta: {x: 1920, y: 1080}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!1 &939919704
@@ -1223,8 +1223,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   searchRadiusPerEnemy: 10
-  detectionLineColor: {r: 0, g: 0, b: 1, a: 0.53333336}
-  enemiesPerFrameSlice: 10
+  enemiesPerFrameSlice: 5
 --- !u!1 &1114585175
 GameObject:
   m_ObjectHideFlags: 0
@@ -1283,7 +1282,9 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls: []
   m_text: "<align=\"center\"><b><color=#2E2E2E>Enemy Proximity Detection</color></b>\r\n<size=85%><i><color=#555555>An
-    efficient system for nearest neighbor detection.</color></i></size></align>\r\n<line-height=1.1>\r\n<b><color=#005A9C>SYSTEM
+    efficient system for nearest neighbor detection.</color></i></size></align>\r\n<line-height=1.1>\r\n<b><color=#005A9C>Shortcuts</color></b>\r\n\n<color=#2E2E2E><E>
+    Add 50 enemies</color>\r\n<color=#2E2E2E><R> Remove 50 enemies</color>\r\n<color=#2E2E2E><LMB>
+    Spawn one enemy</color>\r\n<color=#2E2E2E><RMB> Look around</color>\r\n\n\r<b><color=#005A9C>SYSTEM
     OVERVIEW</color></b>\r\n\r\n<color=#2E2E2E>This system demonstrates how to efficiently
     find the nearest enemy for all units using a Spatial Hashing grid structure.</color>\r\n\r\n<color=#2E2E2E>\u2022
     <b>Spatial Hashing Manager:</b> Organizes all enemies into a grid of cells, speeding
@@ -1632,7 +1633,7 @@ RectTransform:
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
   m_AnchoredPosition: {x: 1.65, y: 16.29}
-  m_SizeDelta: {x: 65, y: 61.3}
+  m_SizeDelta: {x: 65, y: 68}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1639956431
 MonoBehaviour:
@@ -1860,7 +1861,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: Stats
+  m_text: <color=#2E2E2E>Stats
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}

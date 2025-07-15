@@ -1,8 +1,6 @@
-﻿using System;
-using UnityEngine;
+﻿using UnityEngine;
 using System.Collections; // Required for IEnumerator
 using System.Collections.Generic;
-using System.Linq; // For FindObjectsOfType, though consider alternative for large N
 
 /// <summary>
 /// A manager that iterates through all enemies and finds the nearest enemy for each.
@@ -14,9 +12,6 @@ public class EnemyProximityDetector : MonoBehaviour
     [SerializeField]
     private float searchRadiusPerEnemy = 25f; // The radius each enemy will search within
 
-    [SerializeField]
-    private Color detectionLineColor = Color.blue; // Color for lines drawn in Playmode (main)
-
     [SerializeField, Tooltip("The maximum number of enemy queries to process per frame. Set to 0 or less to process all in one frame (not recommended for many enemies).")]
     private int enemiesPerFrameSlice = 10; // Process 10 enemies per frame slice by default
 
@@ -24,6 +19,10 @@ public class EnemyProximityDetector : MonoBehaviour
     private Dictionary<Enemy, Enemy> nearestEnemyPairs = new();
 
     private Coroutine _proximityCoroutine = null; // Reference to the running coroutine
+
+    private Enemy[] cachedEnemyArray; // Reuse array to avoid allocations
+    private int lastKnownEnemyCount = 0;
+    private static Color detectionLineColor = Color.blue; // Color for lines drawn in Playmode (main)
 
     /// <summary>
     /// Called when the GameObject becomes enabled and active.
@@ -60,10 +59,16 @@ public class EnemyProximityDetector : MonoBehaviour
     /// </summary>
     void Update()
     {
-        // Debug.DrawLine is called every frame, displaying the latest available detection results.
-        // This makes the lines appear smooth and continuous, even though the underlying
-        // detection logic is spread over multiple frames.
-        DrawDetectionLines();
+        foreach(var pair in nearestEnemyPairs)
+        {
+            Enemy queryingEnemy = pair.Key;
+            Enemy nearestEnemy = pair.Value;
+
+            if (queryingEnemy != null && nearestEnemy != null)
+            {
+                queryingEnemy.DrawLine(nearestEnemy.transform.position);
+            }
+        }
     }
 
     /// <summary>
@@ -73,94 +78,52 @@ public class EnemyProximityDetector : MonoBehaviour
     /// </summary>
     private IEnumerator ProcessAllEnemyProximityQueries()
     {
-        while (true) // Loop indefinitely to continuously update proximity detection
+        while (true)
         {
-            // Safeguard: Wait if SpatialHashingManager is not yet available.
             if (SpatialHashingManager.Instance == null)
             {
-                Debug.LogWarning("EnemyProximityDetector: SpatialHashingManager not found. Waiting...");
-                yield return new WaitForSeconds(1.0f); // Wait a bit before retrying
+                yield return new WaitForSeconds(1.0f);
                 continue;
             }
 
-            // Clear results from the previous full cycle before starting a new one.
-            nearestEnemyPairs.Clear();
+            var allEnemies = SpatialHashingManager.Instance.GetAllEnemies();
 
-            // IMPORTANT TODO: Optimize this! FindObjectsOfType<Enemy>() is inefficient
-            // for very large numbers of enemies as it searches the entire scene.
-            // For production, you should get this list from a centralized manager
-            // (e.g., SpatialHashingManager.Instance.allEnemies if exposed, or an EnemyManager)
-            // that maintains an up-to-date collection of active enemies.
-            Enemy[] allActiveEnemies = FindObjectsOfType<Enemy>();
-
-            int enemiesProcessedThisSlice = 0;
-            for (int i = 0; i < allActiveEnemies.Length; i++)
+            // Reuse array if enemy count hasn't changed
+            if (cachedEnemyArray == null || allEnemies.Count != lastKnownEnemyCount)
             {
-                Enemy queryingEnemy = allActiveEnemies[i];
-
-                // Skip if the enemy was destroyed while the coroutine was paused.
-                if (queryingEnemy == null)
-                {
-                    continue;
-                }
-
-                // Call the optimized FindNearestEnemy from SpatialHashingManager.
-                // It excludes the querying enemy itself from the search.
-                Enemy foundNearestEnemy = SpatialHashingManager.Instance.FindNearestEnemy(
-                    queryingEnemy.transform.position,
-                    searchRadiusPerEnemy,
-                    queryingEnemy // Pass the enemy to exclude itself
-                );
-
-                // This check (foundNearestEnemy == queryingEnemy) is technically redundant
-                // because FindNearestEnemy now handles the exclusion.
-                // Keeping it as per your original code's explicit check.
-                if (foundNearestEnemy == queryingEnemy)
-                {
-                    foundNearestEnemy = null;
-                }
-
-                // If a valid nearest enemy was found, store the pair.
-                if (foundNearestEnemy != null)
-                {
-                    nearestEnemyPairs[queryingEnemy] = foundNearestEnemy;
-                }
-
-                enemiesProcessedThisSlice++;
-
-                // Yield control back to Unity if we've processed enough enemies for this frame slice.
-                // Or if enemiesPerFrameSlice is 0 or less, process all in one go (not recommended).
-                if (enemiesPerFrameSlice > 0 && enemiesProcessedThisSlice >= enemiesPerFrameSlice)
-                {
-                    yield return null; // Pause execution here and resume on the next frame.
-                    enemiesProcessedThisSlice = 0; // Reset counter for the next slice of work.
-                }
+                cachedEnemyArray = new Enemy[allEnemies.Count];
+                lastKnownEnemyCount = allEnemies.Count;
             }
 
-            // After processing all enemies in the current full cycle, yield one last time.
-            // This ensures there's at least one frame break between complete cycles
-            // and prevents the coroutine from hogging the CPU continuously.
-            yield return null;
-        }
-    }
-
-    /// <summary>
-    /// Draws debug lines between enemies and their detected nearest neighbors.
-    /// This is called every frame to ensure continuous visualization.
-    /// </summary>
-    private void DrawDetectionLines()
-    {
-        foreach (var pair in nearestEnemyPairs)
-        {
-            Enemy queryingEnemy = pair.Key;
-            Enemy nearestEnemy = pair.Value;
-
-            // Only draw if both enemies are still valid (not destroyed).
-            if (queryingEnemy != null && nearestEnemy != null)
+            // Copy to array for faster iteration
+            for (int i = 0; i < allEnemies.Count; i++)
             {
-                queryingEnemy.DrawLine(nearestEnemy.transform.position, detectionLineColor);
-                
-                Debug.DrawLine(queryingEnemy.transform.position, nearestEnemy.transform.position, detectionLineColor);
+                cachedEnemyArray[i] = allEnemies[i];
+            }
+
+            // Process in chunks without dictionary clearing
+            for (int i = 0; i < cachedEnemyArray.Length; i += enemiesPerFrameSlice)
+            {
+                int endIndex = Mathf.Min(i + enemiesPerFrameSlice, cachedEnemyArray.Length);
+
+                for (int j = i; j < endIndex; j++)
+                {
+                    var enemy = cachedEnemyArray[j];
+                    if (enemy == null) continue;
+
+                    var nearest = SpatialHashingManager.Instance.FindNearestEnemy(
+                        enemy.transform.position, searchRadiusPerEnemy, enemy);
+
+                    if (nearest != null)
+                        nearestEnemyPairs[enemy] = nearest;
+                    else
+                    {
+                        nearestEnemyPairs.Remove(enemy); // Remove invalid entries
+                        enemy.RemoveLine();
+                    }
+                }
+
+                yield return null;
             }
         }
     }
